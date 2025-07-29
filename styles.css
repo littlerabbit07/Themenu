@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+body {
+  background: black;
+  margin: 0;
+  font-family: 'Share Tech Mono', monospace;
+  color: #00ff66;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.terminal {
+  padding: 40px;
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.menu-item {
+  position: relative;
+  font-size: 2em;
+  cursor: pointer;
+  transition: color 0.2s ease-in-out;
+}
+
+.menu-item:hover {
+  color: #ffffff;
+  text-shadow: 0 0 5px white, 0 0 10px #00ff66;
+}
+
+.underline {
+  height: 2px;
+  width: 0%;
+  background: white;
+  margin-top: 5px;
+  transition: width 0.3s ease-in-out;
+}
+
+.menu-item:hover .underline {
+  width: 100%;
+}
+
+.description {
+  margin-top: 10px;
+  color: #00ff66;
+  white-space: pre-wrap;
+  min-height: 2em;
+}
+
+.flicker-layer {
+  pointer-events: none;
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 255, 0, 0.03),
+    rgba(0, 255, 0, 0.03) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  mix-blend-mode: color-dodge;
+  animation: flicker 8s infinite steps(1, end);
+}
+
+@keyframes flicker {
+  0%, 99% { opacity: 0.95; }
+  1% { opacity: 0.4; }
+  3% { opacity: 1; }
+  5% { opacity: 0.6; }
+  10% { opacity: 1; }
+}
