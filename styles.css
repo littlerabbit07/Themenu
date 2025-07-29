@@ -1,81 +1,88 @@
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-
 body {
-  background: black;
   margin: 0;
-  font-family: 'Share Tech Mono', monospace;
-  color: #00ff66;
-  height: 100vh;
+  background: black;
+  font-family: 'Courier New', monospace;
+  color: #33ff66;
+  text-shadow: 0 0 5px #33ff66;
   overflow: hidden;
 }
 
 .terminal {
-  padding: 40px;
-  position: relative;
-  height: 100%;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  height: 100vh;
+  padding: 1rem;
+  box-sizing: border-box;
+  border: 3px solid #33ff66;
+  position: relative;
 }
 
-.menu {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
+.sidebar {
+  width: 200px;
+  border-right: 1px solid #33ff66;
 }
 
-.menu-item {
-  position: relative;
-  font-size: 2em;
+.sidebar h2 {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar li {
+  padding: 0.5rem;
   cursor: pointer;
-  transition: color 0.2s ease-in-out;
+  transition: background 0.2s;
 }
 
-.menu-item:hover {
-  color: #ffffff;
-  text-shadow: 0 0 5px white, 0 0 10px #00ff66;
+.sidebar li:hover,
+.sidebar li.active {
+  background: rgba(51, 255, 102, 0.2);
+  border-left: 3px solid #33ff66;
 }
 
-.underline {
-  height: 2px;
-  width: 0%;
-  background: white;
-  margin-top: 5px;
-  transition: width 0.3s ease-in-out;
+.main {
+  padding: 1rem;
+  flex-grow: 1;
+  position: relative;
 }
 
-.menu-item:hover .underline {
-  width: 100%;
+#section-title {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .description {
-  margin-top: 10px;
-  color: #00ff66;
+  font-size: 1rem;
   white-space: pre-wrap;
-  min-height: 2em;
+  line-height: 1.4;
+  min-height: 100px;
 }
 
-.flicker-layer {
-  pointer-events: none;
-  position: absolute;
-  top: 0; left: 0;
+/* Scanlines and flicker */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   background: repeating-linear-gradient(
-    0deg,
-    rgba(0, 255, 0, 0.03),
-    rgba(0, 255, 0, 0.03) 1px,
-    transparent 1px,
-    transparent 2px
+    to bottom,
+    rgba(0, 0, 0, 0.2) 0px,
+    rgba(0, 0, 0, 0.2) 1px,
+    transparent 2px,
+    transparent 4px
   );
-  mix-blend-mode: color-dodge;
-  animation: flicker 8s infinite steps(1, end);
+  pointer-events: none;
+  z-index: 100;
+  mix-blend-mode: overlay;
+  animation: flicker 1.2s infinite;
 }
 
 @keyframes flicker {
-  0%, 99% { opacity: 0.95; }
-  1% { opacity: 0.4; }
-  3% { opacity: 1; }
-  5% { opacity: 0.6; }
-  10% { opacity: 1; }
+  0%, 100% { opacity: 0.92; }
+  50% { opacity: 0.96; }
 }

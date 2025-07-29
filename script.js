@@ -1,29 +1,31 @@
-const items = document.querySelectorAll('.menu-item');
+const descriptions = {
+  files: "A server container that's just a file server accessible from a web browser. Lightweight, fast, and exposed via HTTP.",
+  pwas: "Built with HTML, CSS, and JS. Uses a service worker for offline work and a manifest for installability. Feels like a native app.",
+  arduino: "An Arduino cat feeder using an RTC and SG90 servo to release food at set hours. Feeds automatically even when you're away.",
+  blog: "A blog made with Flask on a Linux server. Post and manage articles from your own machine. Uses Gunicorn and Nginx.",
+  feeder: "Automated feeder controlled by time, reliable when you're not home. Built for simplicity with reusable hardware."
+};
 
-items.forEach(item => {
-  const desc = item.querySelector('.description');
-  const text = item.dataset.description;
+const tabs = document.querySelectorAll('.tab');
+const typewriter = document.getElementById('typewriter-text');
+const title = document.getElementById('section-title');
 
-  let typingTimeout;
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
 
-  item.addEventListener('mouseenter', () => {
-    desc.textContent = '';
-    let i = 0;
-    clearTimeout(typingTimeout);
+    const section = tab.dataset.target;
+    title.textContent = section.charAt(0).toUpperCase() + section.slice(1);
+    typewriter.textContent = '';
 
-    const type = () => {
-      if (i < text.length) {
-        desc.textContent += text.charAt(i);
-        i++;
-        typingTimeout = setTimeout(type, 30 + Math.random() * 30);
-      }
-    };
-
-    type();
-  });
-
-  item.addEventListener('mouseleave', () => {
-    clearTimeout(typingTimeout);
-    desc.textContent = '';
+    typeText(descriptions[section]);
   });
 });
+
+function typeText(text, i = 0) {
+  if (i < text.length) {
+    typewriter.textContent += text.charAt(i);
+    setTimeout(() => typeText(text, i + 1), 25);
+  }
+}
