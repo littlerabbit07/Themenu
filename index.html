@@ -3,26 +3,60 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Alien Terminal Menu</title>
+  <title>TheMenu Agent Console</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="terminal">
-    <div class="sidebar">
-      <h2>FOLDERS</h2>
-      <ul>
-        <li class="tab active" data-target="files">Files</li>
-        <li class="tab" data-target="pwas">PWAs</li>
-        <li class="tab" data-target="arduino">Arduino</li>
-        <li class="tab" data-target="blog">Blog</li>
-        <li class="tab" data-target="feeder">Cat Feeder</li>
-      </ul>
-    </div>
+  <div class="terminal-shell">
+    <aside class="sidebar">
+      <div class="brand">theMenu//AGENT</div>
+      <nav class="nav-list">
+        <button class="nav-item active" data-section="overview">overview</button>
+        <button class="nav-item" data-section="planner">planner</button>
+        <button class="nav-item" data-section="builder">builder</button>
+        <button class="nav-item" data-section="monitor">monitor</button>
+        <button class="nav-item" data-section="memory">memory</button>
+      </nav>
+      <div class="status-box">
+        <span class="status-dot"></span>
+        <span>online</span>
+      </div>
+    </aside>
 
-    <div class="main">
-      <h1 id="section-title">Files</h1>
-      <div id="typewriter-text" class="description"></div>
-    </div>
+    <main class="content">
+      <header class="topbar">
+        <div>
+          <span class="topbar-label">Agent</span>
+          <strong id="agent-name">Astra-9</strong>
+        </div>
+        <div class="topbar-badge">ready</div>
+      </header>
+
+      <section class="panel hero-panel">
+        <h1 id="section-title">Overview</h1>
+        <div id="typewriter-text" class="description"></div>
+      </section>
+
+      <section class="panel console-panel">
+        <div class="console-header">
+          <span>Console</span>
+          <button id="clear-console" class="ghost-button">clear</button>
+        </div>
+        <div id="console-output" class="console-output" aria-live="polite"></div>
+
+        <div class="prompt-row">
+          <input id="command-input" type="text" placeholder="Enter a command or ask the agent..." aria-label="Agent command input" />
+          <button id="run-command" class="primary-button">execute</button>
+        </div>
+
+        <div class="quick-actions">
+          <button class="quick-action" data-command="summarize the project">summarize</button>
+          <button class="quick-action" data-command="create a launch plan">plan</button>
+          <button class="quick-action" data-command="review for risks">review</button>
+          <button class="quick-action" data-command="show status">status</button>
+        </div>
+      </section>
+    </main>
   </div>
 
   <script src="script.js"></script>
