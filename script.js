@@ -64,14 +64,6 @@ function renderFolders() {
   });
 }
 
-function focusFolder(index) {
-  if (!folders.length) return;
-  keyboardFolderIndex = (index + folders.length) % folders.length;
-  const folder = folders[keyboardFolderIndex];
-  const item = folderList.querySelector(`[data-target="${CSS.escape(folder.id)}"]`);
-  if (item) item.focus();
-}
-
 function selectFolder(id) {
   const folder = folders.find(folder => folder.id === id);
   if (!folder) return;
@@ -256,8 +248,65 @@ resetButton.addEventListener("click", () => {
   });
 });
 
-// Keyboard-first navigation: arrows keep focus inside the terminal folder list.
-// Tab remains available as a fallback for standard browser accessibility, but is not required.
+// Spatial keyboard navigation.
+// Arrow keys move to the closest visible interactive element in the requested
+// direction. If there is no target, the browser keeps its normal behavior,
+// including scrolling a long folder list or the page.
+function getKeyboardTargets() {
+  return [...document.querySelectorAll("button, [tabindex=\"0\"]")].filter(element => {
+    if (element.disabled) return false;
+    if (element.closest(".hidden")) return false;
+    const rect = element.getBoundingClientRect();
+    return rect.width > 0 && rect.height > 0;
+  });
+}
+
+function findNearestInDirection(current, direction) {
+  if (!current || current === document.body) return null;
+
+  const currentRect = current.getBoundingClientRect();
+  const cx = currentRect.left + currentRect.width / 2;
+  const cy = currentRect.top + currentRect.height / 2;
+  const targets = getKeyboardTargets().filter(target => target !== current);
+
+  let best = null;
+  let bestScore = Infinity;
+
+  for (const target of targets) {
+    const rect = target.getBoundingClientRect();
+    const tx = rect.left + rect.width / 2;
+    const ty = rect.top + rect.height / 2;
+    const dx = tx - cx;
+    const dy = ty - cy;
+
+    let primaryDistance;
+    let secondaryDistance;
+
+    if (direction === "left" || direction === "right") {
+      if (direction === "right" && dx <= 0) continue;
+      if (direction === "left" && dx >= 0) continue;
+      primaryDistance = Math.abs(dx);
+      secondaryDistance = Math.abs(dy);
+    } else {
+      if (direction === "down" && dy <= 0) continue;
+      if (direction === "up" && dy >= 0) continue;
+      primaryDistance = Math.abs(dy);
+      secondaryDistance = Math.abs(dx);
+    }
+
+    // Primary distance dominates, while alignment breaks ties. This keeps
+    // LEFT from RENAME on EDIT rather than jumping to an unrelated control.
+    const score = primaryDistance + secondaryDistance * 1.35;
+
+    if (score < bestScore) {
+      bestScore = score;
+      best = target;
+    }
+  }
+
+  return best;
+}
+
 document.addEventListener("keydown", event => {
   if (!dialog.classList.contains("hidden")) {
     if (event.key === "Escape") { event.preventDefault(); closeDialog(); }
@@ -268,6 +317,7 @@ document.addEventListener("keydown", event => {
   const tag = active?.tagName;
   const editingField = tag === "INPUT" || tag === "TEXTAREA";
 
+  // Never hijack arrows while the user is editing text.
   if (editingField) {
     if (event.key === "Escape") {
       event.preventDefault();
@@ -276,9 +326,25 @@ document.addEventListener("keydown", event => {
     return;
   }
 
-  if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-    event.preventDefault();
-    focusFolder(event.key === "ArrowDown" ? keyboardFolderIndex + 1 : keyboardFolderIndex - 1);
+  const directions = {
+    ArrowUp: "up",
+    ArrowDown: "down",
+    ArrowLeft: "left",
+    ArrowRight: "right"
+  };
+
+  const direction = directions[event.key];
+
+  if (direction) {
+    const target = findNearestInDirection(active, direction);
+
+    if (target) {
+      event.preventDefault();
+      target.focus();
+      target.scrollIntoView({ block: "nearest", inline: "nearest" });
+    }
+
+    // No target means the browser is allowed to scroll naturally.
     return;
   }
 
@@ -297,5 +363,8 @@ document.addEventListener("keydown", event => {
 renderFolders();
 if (activeFolderId) {
   selectFolder(activeFolderId);
-  requestAnimationFrame(() => focusFolder(keyboardFolderIndex));
+  requestAnimationFrame(() => {
+    const activeItem = folderList.querySelector(`[data-target="${CSS.escape(activeFolderId)}"]`);
+    if (activeItem) activeItem.focus();
+  });
 }
