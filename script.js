@@ -64,6 +64,14 @@ function renderFolders() {
   });
 }
 
+function focusFolder(index) {
+  if (!folders.length) return;
+  keyboardFolderIndex = (index + folders.length) % folders.length;
+  const folder = folders[keyboardFolderIndex];
+  const item = folderList.querySelector(`[data-target="${CSS.escape(folder.id)}"]`);
+  if (item) item.focus();
+}
+
 function selectFolder(id) {
   const folder = folders.find(folder => folder.id === id);
   if (!folder) return;
@@ -104,7 +112,7 @@ function openDialog({ type, titleText, fields = [], message = "", primary = "EXE
     input.placeholder = field.placeholder || "";
     input.autocomplete = "off";
     input.spellcheck = false;
-    input.rows = field.rows || 5;
+    if (field.multiline) input.rows = field.rows || 5;
     input.addEventListener("keydown", event => {
       if (event.key === "Enter" && !field.multiline && index === fields.length - 1) {
         event.preventDefault();
@@ -248,40 +256,46 @@ resetButton.addEventListener("click", () => {
   });
 });
 
-// Keyboard navigation: ↑/↓ move folders, Enter selects, Tab moves controls, Esc aborts dialogs/editor.
+// Keyboard-first navigation: arrows keep focus inside the terminal folder list.
+// Tab remains available as a fallback for standard browser accessibility, but is not required.
 document.addEventListener("keydown", event => {
   if (!dialog.classList.contains("hidden")) {
     if (event.key === "Escape") { event.preventDefault(); closeDialog(); }
     return;
   }
 
-  const tag = document.activeElement?.tagName;
+  const active = document.activeElement;
+  const tag = active?.tagName;
   const editingField = tag === "INPUT" || tag === "TEXTAREA";
+
   if (editingField) {
-    if (event.key === "Escape") { event.preventDefault(); document.activeElement.blur(); }
+    if (event.key === "Escape") {
+      event.preventDefault();
+      active.blur();
+    }
     return;
   }
 
   if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-    if (!folders.length) return;
     event.preventDefault();
-    keyboardFolderIndex = event.key === "ArrowDown"
-      ? (keyboardFolderIndex + 1) % folders.length
-      : (keyboardFolderIndex - 1 + folders.length) % folders.length;
-    const folder = folders[keyboardFolderIndex];
-    const item = folderList.querySelector(`[data-target="${CSS.escape(folder.id)}"]`);
-    if (item) item.focus();
+    focusFolder(event.key === "ArrowDown" ? keyboardFolderIndex + 1 : keyboardFolderIndex - 1);
+    return;
   }
 
-  if (event.key === "Enter" && document.activeElement?.classList.contains("tab")) {
+  if (event.key === "Enter" && active?.classList.contains("tab")) {
     event.preventDefault();
-    selectFolder(document.activeElement.dataset.target);
+    selectFolder(active.dataset.target);
+    return;
   }
 
   if (event.key === "e" || event.key === "E") {
-    if (!editingField) editButton.click();
+    event.preventDefault();
+    editButton.click();
   }
 });
 
 renderFolders();
-if (activeFolderId) selectFolder(activeFolderId);
+if (activeFolderId) {
+  selectFolder(activeFolderId);
+  requestAnimationFrame(() => focusFolder(keyboardFolderIndex));
+}
